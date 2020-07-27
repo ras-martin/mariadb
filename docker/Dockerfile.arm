@@ -1,0 +1,46 @@
+ARG BASE_IMAGE_PREFIX
+FROM ${BASE_IMAGE_PREFIX}alpine:3.12
+
+ARG ARCH
+ARG BUILD_DATE
+LABEL maintainer="martin+docker@x8x.at" \
+        arch="${ARCH}" \
+        purpose="general" \
+        builddate="${BUILD_DATE}"
+
+COPY qemu-${ARCH}-static /usr/bin
+
+RUN apk upgrade --update \
+    && apk add \
+        bash \
+        pwgen \
+        mariadb \
+        mariadb-client \
+        bash \
+        supervisor \
+    && rm -rf \
+        /etc/my.cnf.d \
+        /etc/mysql \
+    && mkdir -p \
+        /var/run/sockets/supervisord \
+        /var/log/supervisord \
+        /run/mysqld/ \
+        /var/log/mysql \
+    && chown -R root:root /var/log/supervisord* \
+    && chown -R mysql:mysql \
+        /run/mysqld \
+        /var/log/mysql
+
+# System stuff
+COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/my.cnf /etc/my.cnf
+
+# Entrypoint
+COPY docker/entrypoint.sh /
+COPY docker/entrypoint.d/ /entrypoint.d/
+RUN chmod +x /entrypoint.d/*
+
+EXPOSE 3306
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD /usr/bin/supervisord -c /etc/supervisord.conf -n

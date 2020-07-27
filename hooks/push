@@ -1,0 +1,12 @@
+#!/bin/bash
+
+source hooks/.config
+
+for arch in ${build_architectures[@]}; do
+    docker push "${DOCKER_REPO}:${arch}"
+
+    if [ "${arch}" = "amd64" ]; then
+        docker tag "${DOCKER_REPO}:${arch}" "${IMAGE_NAME}"
+        docker push "${IMAGE_NAME}"
+    fi
+done
