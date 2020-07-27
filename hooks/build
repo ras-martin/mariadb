@@ -13,7 +13,7 @@ for arch in ${build_architectures[@]}; do
         --build-arg BASE_IMAGE_PREFIX=${BASE_IMAGE_PREFIX} \
         --build-arg ARCH=${docker_qemu_arch_map[${arch}]} \
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-        --tag "${DOCKER_REPO}:${purpose}-${arch}" \
+        --tag "${DOCKER_REPO}:${arch}" \
         -f docker/Dockerfile.${docker_to_manifest_map[${arch}]} \
         .
 done
